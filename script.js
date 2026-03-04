@@ -202,14 +202,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     timestamp: serverTimestamp()
                 });
 
-                // Prepare order message for WhatsApp
-                const targetPhone = "919966077583";
+                // Prepare order message for SMS
+                const targetPhone = "9966077583";
                 const message = `*New Order: Sip & Chill*\n\n*Customer Details*\n*Name:* ${fullname}\n*Mobile:* ${mobile}\n*Address:* ${address}\n\n*Order Details*\n${currentOrder.item} - ₹${currentOrder.price}`;
 
-                const whatsappUrl = `https://wa.me/${targetPhone}?text=${encodeURIComponent(message)}`;
+                const smsUrl = `sms:${targetPhone}?body=${encodeURIComponent(message)}`;
 
-                // Open WhatsApp in a new tab
-                window.open(whatsappUrl, '_blank');
+                // Open SMS app
+                window.location.href = smsUrl;
 
                 // Reset form and go back to menu
                 document.getElementById('fullname').value = '';
