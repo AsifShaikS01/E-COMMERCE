@@ -103,8 +103,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     password: passwordInput,
                     createdAt: serverTimestamp()
                 });
-                alert("Registration successful! You are now logged in.");
-                showScreen('menu');
+                alert("Registration successful! Please login to continue.");
+                document.getElementById('username').value = '';
+                document.getElementById('password').value = '';
             }
         } catch (error) {
             console.error("Error registering user: ", error);
