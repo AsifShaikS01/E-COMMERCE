@@ -18,11 +18,32 @@
                 <input type="text" id="username" placeholder="user name">
             </div>
             <div class="form-group">
-                <input type="password" id="password" placeholder="password">
+                <input type="tel" id="mobileNumber" placeholder="mobile number">
             </div>
             <div class="btn-group">
                 <button class="btn btn-outline" id="btn-register">register</button>
                 <button class="btn btn-primary" id="btn-login">login</button>
+            </div>
+        </div>
+
+        <!-- Profile Screen -->
+        <div id="profile-screen" class="screen">
+            <div class="header">
+                <button class="back-btn"><i class="fas fa-arrow-left"></i></button>
+                <h2>MY PROFILE</h2>
+            </div>
+            <div class="profile-details"
+                style="display: flex; flex-direction: column; align-items: center; padding: 30px 0;">
+                <div class="profile-avatar" style="font-size: 5rem; color: #38bdf8; margin-bottom: 20px;"><i
+                        class="fas fa-user-circle"></i></div>
+                <h3 id="profile-username"
+                    style="font-size: 1.8rem; color: #fff; margin-bottom: 10px; text-transform: uppercase;">User Name
+                </h3>
+                <p id="profile-mobile" style="font-size: 1.1rem; color: #94a3b8; letter-spacing: 1px;">Mobile Number</p>
+
+                <div class="btn-group" style="width: 100%; margin-top: 40px;">
+                    <button class="btn btn-outline" id="btn-logout">LOGOUT</button>
+                </div>
             </div>
         </div>
 
@@ -35,9 +56,9 @@
             <div class="menu-list">
                 <button class="menu-item" data-target="iceCreams">ice creams</button>
                 <button class="menu-item" data-target="juice">juice</button>
-                <button class="menu-item disabled">sp-juice</button>
-                <button class="menu-item disabled">lassi items</button>
-                <button class="menu-item disabled">falooda-s</button>
+                <button class="menu-item" data-target="spJuice">sp-juice</button>
+                <button class="menu-item" data-target="lassiItems">lassi items</button>
+                <button class="menu-item" data-target="faloodas">falooda-s</button>
             </div>
         </div>
 
@@ -64,6 +85,14 @@
                     <span>PISTA ICE CREAM</span>
                     <button class="order-btn" data-item="Pista Ice Cream" data-price="50">ORDER 50/-</button>
                 </div>
+                <div class="product-item">
+                    <span>BUTTERSCOTCH ICE CREAM</span>
+                    <button class="order-btn" data-item="Butterscotch Ice Cream" data-price="50">ORDER 50/-</button>
+                </div>
+                <div class="product-item">
+                    <span>BLACK CURRANT ICE CREAM</span>
+                    <button class="order-btn" data-item="Black Currant Ice Cream" data-price="60">ORDER 60/-</button>
+                </div>
             </div>
         </div>
 
@@ -75,20 +104,182 @@
             </div>
             <div class="product-list">
                 <div class="product-item">
+                    <span>SUGARCANE JUICE</span>
+                    <button class="order-btn" data-item="Sugarcane Juice" data-price="20">ORDER 20/-</button>
+                </div>
+                <div class="product-item">
                     <span>BANANA JUICE</span>
                     <button class="order-btn" data-item="Banana Juice" data-price="40">ORDER 40/-</button>
                 </div>
                 <div class="product-item">
-                    <span>PINE APPLE JUICE</span>
-                    <button class="order-btn" data-item="Pine Apple Juice" data-price="40">ORDER 40/-</button>
+                    <span>PINEAPPLE JUICE</span>
+                    <button class="order-btn" data-item="Pineapple Juice" data-price="40">ORDER 40/-</button>
                 </div>
                 <div class="product-item">
-                    <span>WATER MELON JUICE</span>
-                    <button class="order-btn" data-item="Water Melon Juice" data-price="40">ORDER 40/-</button>
+                    <span>WATERMELON JUICE</span>
+                    <button class="order-btn" data-item="Watermelon Juice" data-price="40">ORDER 40/-</button>
                 </div>
                 <div class="product-item">
-                    <span>GRAPES</span>
-                    <button class="order-btn" data-item="Grapes" data-price="40">ORDER 40/-</button>
+                    <span>GRAPES JUICE</span>
+                    <button class="order-btn" data-item="Grapes Juice" data-price="40">ORDER 40/-</button>
+                </div>
+                <div class="product-item">
+                    <span>PAPAYA JUICE</span>
+                    <button class="order-btn" data-item="Papaya Juice" data-price="40">ORDER 40/-</button>
+                </div>
+                <div class="product-item">
+                    <span>KHARBUJA JUICE</span>
+                    <button class="order-btn" data-item="Kharbuja Juice" data-price="40">ORDER 40/-</button>
+                </div>
+                <div class="product-item">
+                    <span>ORANGE JUICE</span>
+                    <button class="order-btn" data-item="Orange Juice" data-price="40">ORDER 40/-</button>
+                </div>
+                <div class="product-item">
+                    <span>POMEGRANATE JUICE</span>
+                    <button class="order-btn" data-item="Pomegranate Juice" data-price="50">ORDER 50/-</button>
+                </div>
+                <div class="product-item">
+                    <span>APPLE JUICE</span>
+                    <button class="order-btn" data-item="Apple Juice" data-price="50">ORDER 50/-</button>
+                </div>
+                <div class="product-item">
+                    <span>SAPOTA JUICE</span>
+                    <button class="order-btn" data-item="Sapota Juice" data-price="50">ORDER 50/-</button>
+                </div>
+                <div class="product-item">
+                    <span>CARROT JUICE</span>
+                    <button class="order-btn" data-item="Carrot Juice" data-price="60">ORDER 60/-</button>
+                </div>
+                <div class="product-item">
+                    <span>BEETROOT JUICE</span>
+                    <button class="order-btn" data-item="Beetroot Juice" data-price="60">ORDER 60/-</button>
+                </div>
+                <div class="product-item">
+                    <span>DRY FRUIT JUICE</span>
+                    <button class="order-btn" data-item="Dry Fruit Juice" data-price="80">ORDER 80/-</button>
+                </div>
+                <div class="product-item">
+                    <span>CAP (CARROT, APPLE, PINEAPPLE) JUICE</span>
+                    <button class="order-btn" data-item="CAP Juice" data-price="80">ORDER 80/-</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- sp juice Screen -->
+        <div id="sp-juice-screen" class="screen">
+            <div class="header">
+                <button class="back-btn"><i class="fas fa-arrow-left"></i></button>
+                <h2>SP-JUICE</h2>
+            </div>
+            <div class="product-list">
+                <div class="product-item">
+                    <span>BANANA JUICE</span>
+                    <button class="order-btn" data-item="Banana Juice" data-price="60">ORDER 60/-</button>
+                </div>
+                <div class="product-item">
+                    <span>PINEAPPLE JUICE</span>
+                    <button class="order-btn" data-item="Pineapple Juice" data-price="60">ORDER 60/-</button>
+                </div>
+                <div class="product-item">
+                    <span>WATERMELON JUICE</span>
+                    <button class="order-btn" data-item="Watermelon Juice" data-price="60">ORDER 60/-</button>
+                </div>
+                <div class="product-item">
+                    <span>GRAPES JUICE</span>
+                    <button class="order-btn" data-item="Grapes Juice" data-price="60">ORDER 60/-</button>
+                </div>
+                <div class="product-item">
+                    <span>PAPAYA JUICE</span>
+                    <button class="order-btn" data-item="Papaya Juice" data-price="60">ORDER 60/-</button>
+                </div>
+                <div class="product-item">
+                    <span>KHARBUJA JUICE</span>
+                    <button class="order-btn" data-item="Kharbuja Juice" data-price="60">ORDER 60/-</button>
+                </div>
+                <div class="product-item">
+                    <span>ORANGE JUICE</span>
+                    <button class="order-btn" data-item="Orange Juice" data-price="60">ORDER 60/-</button>
+                </div>
+                <div class="product-item">
+                    <span>SUGARCANE JUICE</span>
+                    <button class="order-btn" data-item="Sugarcane Juice" data-price="60">ORDER 60/-</button>
+                </div>
+                <div class="product-item">
+                    <span>POMEGRANATE JUICE</span>
+                    <button class="order-btn" data-item="Pomegranate Juice" data-price="70">ORDER 70/-</button>
+                </div>
+                <div class="product-item">
+                    <span>APPLE JUICE</span>
+                    <button class="order-btn" data-item="Apple Juice" data-price="70">ORDER 70/-</button>
+                </div>
+                <div class="product-item">
+                    <span>SAPOTA JUICE</span>
+                    <button class="order-btn" data-item="Sapota Juice" data-price="70">ORDER 70/-</button>
+                </div>
+                <div class="product-item">
+                    <span>CAP (CARROT, APPLE, PINEAPPLE) JUICE</span>
+                    <button class="order-btn" data-item="CAP Juice" data-price="90">ORDER 90/-</button>
+                </div>
+                <div class="product-item">
+                    <span>DRY FRUIT JUICE</span>
+                    <button class="order-btn" data-item="Dry Fruit Juice" data-price="120">ORDER 120/-</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lassi items -->
+        <div id="lassi-items" class="screen">
+            <div class="header">
+                <button class="back-btn"><i class="fas fa-arrow-left"></i></button>
+                <h2>LASSI-ITEMS</h2>
+            </div>
+            <div class="product-list">
+                <div class="product-item">
+                    <span>SWEET LASSI</span>
+                    <button class="order-btn" data-item="Sweet Lassi" data-price="50">ORDER 50/-</button>
+                </div>
+                <div class="product-item">
+                    <span>BANANA LASSI</span>
+                    <button class="order-btn" data-item="Banana Lassi" data-price="50">ORDER 50/-</button>
+                </div>
+                <div class="product-item">
+                    <span>BLACK CURRANT LASSI</span>
+                    <button class="order-btn" data-item="Black Currant Lassi" data-price="60">ORDER 60/-</button>
+                </div>
+                <div class="product-item">
+                    <span>CHOCOLATE LASSI</span>
+                    <button class="order-btn" data-item="Chocolate Lassi" data-price="60">ORDER 60/-</button>
+                </div>
+                <div class="product-item">
+                    <span>DRY FRUITS LASSI</span>
+                    <button class="order-btn" data-item="Dry Fruits Lassi" data-price="90">ORDER 90/-</button>
+                </div>
+                <div class="product-item">
+                    <span>MIXED FRUIT LASSI</span>
+                    <button class="order-btn" data-item="Mixed Fruit Lassi" data-price="90">ORDER 90/-</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Falooda's Screen -->
+        <div id="faloodas-screen" class="screen">
+            <div class="header">
+                <button class="back-btn"><i class="fas fa-arrow-left"></i></button>
+                <h2>FALOODA-S</h2>
+            </div>
+            <div class="product-list">
+                <div class="product-item">
+                    <span>MIXED FRUIT SALAD</span>
+                    <button class="order-btn" data-item="Mixed Fruit Salad" data-price="60">ORDER 60/-</button>
+                </div>
+                <div class="product-item">
+                    <span>SP-MIXED FRUIT SALAD</span>
+                    <button class="order-btn" data-item="SP-Mixed Fruit Salad" data-price="80">ORDER 80/-</button>
+                </div>
+                <div class="product-item">
+                    <span>FALOODA</span>
+                    <button class="order-btn" data-item="Falooda" data-price="100">ORDER 100/-</button>
                 </div>
             </div>
         </div>
@@ -107,9 +298,9 @@
                 <input type="text" id="mobile" placeholder="MOBILE NUMBER">
             </div>
             <div class="form-group">
-                <textarea id="address" placeholder="ADRESS WITH PIN CODE" rows="4"></textarea>
+                <textarea id="address" placeholder="ADDRESS WITH PIN CODE" rows="4"></textarea>
             </div>
-            <button class="btn btn-primary btn-block" id="btn-confirm-order">CONFORM/ORDER</button>
+            <button class="btn btn-primary btn-block" id="btn-confirm-order">CONFIRM / ORDER</button>
         </div>
     </div>
 

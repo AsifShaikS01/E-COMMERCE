@@ -24,10 +24,15 @@ document.addEventListener('DOMContentLoaded', () => {
         menu: document.getElementById('menu-screen'),
         iceCreams: document.getElementById('ice-creams-screen'),
         juice: document.getElementById('juice-screen'),
+        spJuice: document.getElementById('sp-juice-screen'),
+        lassiItems: document.getElementById('lassi-items'),
+        faloodas: document.getElementById('faloodas-screen'),
+        profile: document.getElementById('profile-screen'),
         order: document.getElementById('order-screen')
     };
 
     let previousScreen = 'menu'; // Default previous screen to go back from order page
+    let currentUser = null; // Store user details globally
 
     function showScreen(screenName) {
         Object.values(screens).forEach(screen => {
@@ -43,10 +48,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // Login logic
     document.getElementById('btn-login').addEventListener('click', async () => {
         const usernameInput = document.getElementById('username').value.trim();
-        const passwordInput = document.getElementById('password').value;
+        const mobileInput = document.getElementById('mobileNumber').value.trim();
 
-        if (!usernameInput || !passwordInput) {
-            alert("Please enter your username and password.");
+        if (!usernameInput || !mobileInput) {
+            alert("Please enter your username and mobile number.");
             return;
         }
 
@@ -56,14 +61,24 @@ document.addEventListener('DOMContentLoaded', () => {
         btn.disabled = true;
 
         try {
-            const q = query(collection(db, "users"), where("username", "==", usernameInput), where("password", "==", passwordInput));
+            const q = query(collection(db, "users"), where("username", "==", usernameInput), where("mobileNumber", "==", mobileInput));
             const querySnapshot = await getDocs(q);
 
             if (!querySnapshot.empty) {
                 // Login successful
+                const userData = querySnapshot.docs[0].data();
+                currentUser = {
+                    username: userData.username,
+                    mobileNumber: userData.mobileNumber
+                };
+
+                // Update profile screen UI
+                document.getElementById('profile-username').innerText = currentUser.username;
+                document.getElementById('profile-mobile').innerText = currentUser.mobileNumber;
+
                 showScreen('menu');
             } else {
-                alert("Invalid username or password.");
+                alert("Invalid username or mobile number.");
             }
         } catch (error) {
             console.error("Error logging in: ", error);
@@ -77,10 +92,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // Register logic
     document.getElementById('btn-register').addEventListener('click', async () => {
         const usernameInput = document.getElementById('username').value.trim();
-        const passwordInput = document.getElementById('password').value;
+        const mobileInput = document.getElementById('mobileNumber').value.trim();
 
-        if (!usernameInput || !passwordInput) {
-            alert("Please enter a username and password.");
+        if (!usernameInput || !mobileInput) {
+            alert("Please enter a username and mobile number.");
             return;
         }
 
@@ -91,21 +106,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             // Check if user already exists
-            const q = query(collection(db, "users"), where("username", "==", usernameInput));
+            const q = query(collection(db, "users"), where("mobileNumber", "==", mobileInput));
             const querySnapshot = await getDocs(q);
 
             if (!querySnapshot.empty) {
-                alert("Username already exists. Please login or choose another.");
+                alert("Mobile number already registered. Please login or try another.");
             } else {
                 // Register user
                 await addDoc(collection(db, "users"), {
                     username: usernameInput,
-                    password: passwordInput,
+                    mobileNumber: mobileInput,
                     createdAt: serverTimestamp()
                 });
                 alert("Registration successful! Please login to continue.");
                 document.getElementById('username').value = '';
-                document.getElementById('password').value = '';
+                document.getElementById('mobileNumber').value = '';
             }
         } catch (error) {
             console.error("Error registering user: ", error);
@@ -135,7 +150,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (currentScreen === 'order-screen') {
                 showScreen(previousScreen);
-            } else if (currentScreen === 'ice-creams-screen' || currentScreen === 'juice-screen') {
+            } else if (currentScreen === 'ice-creams-screen' || currentScreen === 'juice-screen' || currentScreen === 'sp-juice-screen' || currentScreen === 'lassi-items' || currentScreen === 'faloodas-screen' || currentScreen === 'profile-screen') {
                 showScreen('menu');
             }
         });
@@ -161,6 +176,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 previousScreen = 'iceCreams';
             } else if (currentScreen === 'juice-screen') {
                 previousScreen = 'juice';
+            } else if (currentScreen === 'sp-juice-screen') {
+                previousScreen = 'spJuice';
+            } else if (currentScreen === 'lassi-items') {
+                previousScreen = 'lassiItems';
+            } else if (currentScreen === 'faloodas-screen') {
+                previousScreen = 'faloodas';
             }
 
             // Update order summary
@@ -229,5 +250,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 btnConfirm.disabled = false;
             }
         }
+    });
+
+    // Profile Click Logic
+    document.querySelector('.profile-icon').addEventListener('click', () => {
+        showScreen('profile');
+    });
+
+    // Logout Logic
+    document.getElementById('btn-logout').addEventListener('click', () => {
+        currentUser = null;
+        document.getElementById('username').value = '';
+        document.getElementById('mobileNumber').value = '';
+        showScreen('login');
     });
 });

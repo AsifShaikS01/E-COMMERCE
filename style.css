@@ -26,7 +26,7 @@ body {
     height: 750px;
     border-radius: 30px;
     border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
     overflow: hidden;
     position: relative;
     padding: 30px;
@@ -46,8 +46,17 @@ body {
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); filter: blur(5px); }
-    to { opacity: 1; transform: translateY(0); filter: blur(0); }
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+        filter: blur(5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+        filter: blur(0);
+    }
 }
 
 /* Typography & Titles */
@@ -119,7 +128,8 @@ h1.logo {
     margin-bottom: 20px;
 }
 
-input, textarea {
+input,
+textarea {
     width: 100%;
     background: rgba(15, 23, 42, 0.6);
     border: 1px solid rgba(255, 255, 255, 0.1);
@@ -130,14 +140,16 @@ input, textarea {
     transition: all 0.3s ease;
 }
 
-input::placeholder, textarea::placeholder {
+input::placeholder,
+textarea::placeholder {
     color: #94a3b8;
     text-transform: uppercase;
     font-size: 0.85rem;
     letter-spacing: 1.5px;
 }
 
-input:focus, textarea:focus {
+input:focus,
+textarea:focus {
     outline: none;
     border-color: #38bdf8;
     background: rgba(15, 23, 42, 0.8);
@@ -263,12 +275,14 @@ textarea {
 .product-list::-webkit-scrollbar {
     width: 6px;
 }
+
 .product-list::-webkit-scrollbar-track {
-    background: rgba(255,255,255,0.05);
+    background: rgba(255, 255, 255, 0.05);
     border-radius: 10px;
 }
+
 .product-list::-webkit-scrollbar-thumb {
-    background: rgba(255,255,255,0.2);
+    background: rgba(255, 255, 255, 0.2);
     border-radius: 10px;
 }
 
@@ -328,7 +342,7 @@ textarea {
     padding: 20px;
     border-radius: 16px;
     margin-bottom: 25px;
-    display: none; 
+    display: none;
 }
 
 .order-summary.active {
