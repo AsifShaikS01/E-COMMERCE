@@ -28,7 +28,19 @@ document.addEventListener('DOMContentLoaded', () => {
         lassiItems: document.getElementById('lassi-items'),
         faloodas: document.getElementById('faloodas-screen'),
         profile: document.getElementById('profile-screen'),
-        order: document.getElementById('order-screen')
+        order: document.getElementById('order-screen'),
+        chicken: document.getElementById('chicken-screen'),
+        crispyChickenDrumsticks: document.getElementById('crispy-chicken-drumsticks-screen'),
+        crispyChickenPopcorn: document.getElementById('crispy-chicken-popcorn-screen'),
+        crispyBonelessStripes: document.getElementById('crispy-boneless-stripes-screen'),
+        frenchFries: document.getElementById('french-fries-screen'),
+        springPotato: document.getElementById('spring-potato-screen'),
+        crispyChickenLollipops: document.getElementById('crispy-chicken-lollipops-screen'),
+        highProtienCombosSp: document.getElementById('high-protien-combos-sp-screen'),
+        familyBucketCombo: document.getElementById('family-bucket-combo-screen'),
+        bigBucketCombo: document.getElementById('big-bucket-combo-screen'),
+        miniBucketCombo: document.getElementById('mini-bucket-combo-screen'),
+        highProtienCombos: document.getElementById('high-protien-combos-screen')
     };
 
     let previousScreen = 'menu'; // Default previous screen to go back from order page
@@ -150,7 +162,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (currentScreen === 'order-screen') {
                 showScreen(previousScreen);
-            } else if (currentScreen === 'ice-creams-screen' || currentScreen === 'juice-screen' || currentScreen === 'sp-juice-screen' || currentScreen === 'lassi-items' || currentScreen === 'faloodas-screen' || currentScreen === 'profile-screen') {
+            } else {
                 showScreen('menu');
             }
         });
@@ -172,16 +184,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Remember the screen we came from to go back
             const currentScreen = btn.closest('.screen').id;
-            if (currentScreen === 'ice-creams-screen') {
-                previousScreen = 'iceCreams';
-            } else if (currentScreen === 'juice-screen') {
-                previousScreen = 'juice';
-            } else if (currentScreen === 'sp-juice-screen') {
-                previousScreen = 'spJuice';
-            } else if (currentScreen === 'lassi-items') {
-                previousScreen = 'lassiItems';
-            } else if (currentScreen === 'faloodas-screen') {
-                previousScreen = 'faloodas';
+            const screenEntries = Object.entries(screens);
+            for (const [key, screenEl] of screenEntries) {
+                if (screenEl && screenEl.id === currentScreen) {
+                    previousScreen = key;
+                    break;
+                }
             }
 
             // Update order summary
@@ -225,7 +233,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
 
                 // Prepare order message for SMS
-                const targetPhone = "9966077583";
+                let targetPhone = "9966077583";
+                const eatAndEnjoyScreens = [
+                    'chicken', 'crispyChickenDrumsticks', 'crispyChickenPopcorn',
+                    'crispyBonelessStripes', 'frenchFries', 'springPotato',
+                    'crispyChickenLollipops', 'highProtienCombosSp', 'familyBucketCombo',
+                    'bigBucketCombo', 'miniBucketCombo', 'highProtienCombos'
+                ];
+
+                if (eatAndEnjoyScreens.includes(previousScreen)) {
+                    targetPhone = "9441125812";
+                }
+
                 const message = `*New Order: Sip & Chill*\n\n*Customer Details*\n*Name:* ${fullname}\n*Mobile:* ${mobile}\n*Address:* ${address}\n\n*Order Details*\n${currentOrder.item} - ₹${currentOrder.price}`;
 
                 const smsUrl = `sms:${targetPhone}?body=${encodeURIComponent(message)}`;
