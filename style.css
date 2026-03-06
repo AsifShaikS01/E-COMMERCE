@@ -67,8 +67,6 @@ h1.logo {
     margin-top: 100px;
     margin-bottom: 60px;
     background: linear-gradient(to right, #38bdf8, #818cf8);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
     text-shadow: 0 4px 20px rgba(56, 189, 248, 0.2);
 }
 
