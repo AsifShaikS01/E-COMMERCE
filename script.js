@@ -20,13 +20,20 @@ const firebaseConfig = {
   measurementId: "G-355G7DV7YF",
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
+
+// Safe analytics
+let analytics;
+try {
+  analytics = getAnalytics(app);
+} catch (e) {
+  console.log("Analytics not supported.");
+}
+
 const db = getFirestore(app);
 
 document.addEventListener("DOMContentLoaded", () => {
-  // Screen management
+
   const screens = {
     login: document.getElementById("login-screen"),
     menu: document.getElementById("menu-screen"),
@@ -38,185 +45,200 @@ document.addEventListener("DOMContentLoaded", () => {
     profile: document.getElementById("profile-screen"),
     order: document.getElementById("order-screen"),
     chicken: document.getElementById("chicken-screen"),
-    crispyChickenDrumsticks: document.getElementById(
-      "crispy-chicken-drumsticks-screen",
-    ),
-    crispyChickenPopcorn: document.getElementById(
-      "crispy-chicken-popcorn-screen",
-    ),
-    crispyBonelessStripes: document.getElementById(
-      "crispy-boneless-stripes-screen",
-    ),
+    crispyChickenDrumsticks: document.getElementById("crispy-chicken-drumsticks-screen"),
+    crispyChickenPopcorn: document.getElementById("crispy-chicken-popcorn-screen"),
+    crispyBonelessStripes: document.getElementById("crispy-boneless-stripes-screen"),
     frenchFries: document.getElementById("french-fries-screen"),
     springPotato: document.getElementById("spring-potato-screen"),
-    crispyChickenLollipops: document.getElementById(
-      "crispy-chicken-lollipops-screen",
-    ),
-    highProtienCombosSp: document.getElementById(
-      "high-protien-combos-sp-screen",
-    ),
+    crispyChickenLollipops: document.getElementById("crispy-chicken-lollipops-screen"),
+    highProtienCombosSp: document.getElementById("high-protien-combos-sp-screen"),
     familyBucketCombo: document.getElementById("family-bucket-combo-screen"),
     bigBucketCombo: document.getElementById("big-bucket-combo-screen"),
     miniBucketCombo: document.getElementById("mini-bucket-combo-screen"),
     highProtienCombos: document.getElementById("high-protien-combos-screen"),
   };
 
-  let previousScreen = "menu"; // Default previous screen to go back from order page
-  let currentUser = null; // Store user details globally
+  let previousScreen = "menu";
+  let currentUser = null;
+  let currentOrder = null;
 
-  // Check for stored user session
-  const storedUser = localStorage.getItem('currentUser');
-  if (storedUser) {
-    currentUser = JSON.parse(storedUser);
-    document.getElementById("profile-username").innerText = currentUser.username;
-    document.getElementById("profile-mobile").innerText = currentUser.mobileNumber;
-    showScreen("menu");
-  } else {
-    showScreen("login");
-  }
+  const orderSummary = document.getElementById("order-summary");
+
+  // SCREEN SWITCH FUNCTION
+  function showScreen(screenName) {
     Object.values(screens).forEach((screen) => {
-      if (screen) {
-        screen.classList.remove("active");
-      }
+      if (screen) screen.classList.remove("active");
     });
+
     if (screens[screenName]) {
       screens[screenName].classList.add("active");
     }
   }
 
-  // Login logic
+  // CHECK LOGIN SESSION
+  const storedUser = localStorage.getItem("currentUser");
+
+  if (storedUser) {
+    currentUser = JSON.parse(storedUser);
+
+    document.getElementById("profile-username").innerText =
+      currentUser.username;
+    document.getElementById("profile-mobile").innerText =
+      currentUser.mobileNumber;
+
+    showScreen("menu");
+  } else {
+    showScreen("login");
+  }
+
+  // LOGIN
   document.getElementById("btn-login").addEventListener("click", async () => {
+
     const usernameInput = document.getElementById("username").value.trim();
     const mobileInput = document.getElementById("mobileNumber").value.trim();
 
     if (!usernameInput || !mobileInput) {
-      alert("Please enter your username and mobile number.");
+      alert("Please enter username and mobile number.");
       return;
     }
 
     const btn = document.getElementById("btn-login");
-    const origText = btn.innerText;
+    const original = btn.innerText;
+
     btn.innerText = "LOGGING IN...";
     btn.disabled = true;
 
     try {
+
       const q = query(
         collection(db, "users"),
         where("username", "==", usernameInput),
-        where("mobileNumber", "==", mobileInput),
+        where("mobileNumber", "==", mobileInput)
       );
+
       const querySnapshot = await getDocs(q);
 
       if (!querySnapshot.empty) {
-        // Login successful
+
         const userData = querySnapshot.docs[0].data();
+
         currentUser = {
           username: userData.username,
           mobileNumber: userData.mobileNumber,
         };
 
-        // Store user session
-        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+        localStorage.setItem("currentUser", JSON.stringify(currentUser));
 
-        // Update profile screen UI
         document.getElementById("profile-username").innerText =
           currentUser.username;
         document.getElementById("profile-mobile").innerText =
           currentUser.mobileNumber;
 
         showScreen("menu");
+
       } else {
         alert("Invalid username or mobile number.");
       }
+
     } catch (error) {
-      console.error("Error logging in: ", error);
-      alert("Error connecting to database.");
-    } finally {
-      btn.innerText = origText;
-      btn.disabled = false;
+      console.error(error);
+      alert("Database connection error.");
     }
+
+    btn.innerText = original;
+    btn.disabled = false;
+
   });
 
-  // Register logic
-  document
-    .getElementById("btn-register")
-    .addEventListener("click", async () => {
-      const usernameInput = document.getElementById("username").value.trim();
-      const mobileInput = document.getElementById("mobileNumber").value.trim();
+  // REGISTER
+  document.getElementById("btn-register").addEventListener("click", async () => {
 
-      if (!usernameInput || !mobileInput) {
-        alert("Please enter a username and mobile number.");
-        return;
+    const usernameInput = document.getElementById("username").value.trim();
+    const mobileInput = document.getElementById("mobileNumber").value.trim();
+
+    if (!usernameInput || !mobileInput) {
+      alert("Enter username and mobile number.");
+      return;
+    }
+
+    const btn = document.getElementById("btn-register");
+    const original = btn.innerText;
+
+    btn.innerText = "REGISTERING...";
+    btn.disabled = true;
+
+    try {
+
+      const q = query(
+        collection(db, "users"),
+        where("mobileNumber", "==", mobileInput)
+      );
+
+      const querySnapshot = await getDocs(q);
+
+      if (!querySnapshot.empty) {
+
+        alert("Mobile already registered.");
+
+      } else {
+
+        await addDoc(collection(db, "users"), {
+          username: usernameInput,
+          mobileNumber: mobileInput,
+          createdAt: serverTimestamp(),
+        });
+
+        alert("Registration successful. Please login.");
+
+        document.getElementById("username").value = "";
+        document.getElementById("mobileNumber").value = "";
       }
 
-      const btn = document.getElementById("btn-register");
-      const origText = btn.innerText;
-      btn.innerText = "REGISTERING...";
-      btn.disabled = true;
+    } catch (error) {
+      console.error(error);
+      alert("Database error.");
+    }
 
-      try {
-        // Check if user already exists
-        const q = query(
-          collection(db, "users"),
-          where("mobileNumber", "==", mobileInput),
-        );
-        const querySnapshot = await getDocs(q);
+    btn.innerText = original;
+    btn.disabled = false;
 
-        if (!querySnapshot.empty) {
-          alert(
-            "Mobile number already registered. Please login or try another.",
-          );
-        } else {
-          // Register user
-          await addDoc(collection(db, "users"), {
-            username: usernameInput,
-            mobileNumber: mobileInput,
-            createdAt: serverTimestamp(),
-          });
-          alert("Registration successful! Please login to continue.");
-          document.getElementById("username").value = "";
-          document.getElementById("mobileNumber").value = "";
-        }
-      } catch (error) {
-        console.error("Error registering user: ", error);
-        alert("Error connecting to database.");
-      } finally {
-        btn.innerText = origText;
-        btn.disabled = false;
-      }
-    });
+  });
 
-  // Menu logic
-  const menuItems = document.querySelectorAll(".menu-item:not(.disabled)");
-  menuItems.forEach((item) => {
+  // MENU NAVIGATION
+  document.querySelectorAll(".menu-item:not(.disabled)").forEach((item) => {
+
     item.addEventListener("click", () => {
-      const targetScreen = item.getAttribute("data-target");
-      if (targetScreen) {
-        showScreen(targetScreen);
-      }
+
+      const target = item.getAttribute("data-target");
+
+      if (target) showScreen(target);
+
     });
+
   });
 
-  // Back button logic
-  const backBtns = document.querySelectorAll(".back-btn");
-  backBtns.forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const currentScreen = btn.closest(".screen").id;
+  // BACK BUTTON
+  document.querySelectorAll(".back-btn").forEach((btn) => {
 
-      if (currentScreen === "order-screen") {
+    btn.addEventListener("click", () => {
+
+      const screenId = btn.closest(".screen").id;
+
+      if (screenId === "order-screen") {
         showScreen(previousScreen);
       } else {
         showScreen("menu");
       }
+
     });
+
   });
 
-  // Order item logic
-  let currentOrder = null;
-  const orderSummary = document.getElementById("order-summary");
-
+  // ORDER BUTTON
   document.querySelectorAll(".order-btn").forEach((btn) => {
+
     btn.addEventListener("click", () => {
+
       const itemName = btn.getAttribute("data-item");
       const itemPrice = btn.getAttribute("data-price");
 
@@ -225,117 +247,125 @@ document.addEventListener("DOMContentLoaded", () => {
         price: itemPrice,
       };
 
-      // Remember the screen we came from to go back
-      const currentScreen = btn.closest(".screen").id;
-      const screenEntries = Object.entries(screens);
-      for (const [key, screenEl] of screenEntries) {
-        if (screenEl && screenEl.id === currentScreen) {
-          previousScreen = key;
-          break;
-        }
-      }
+      const screenId = btn.closest(".screen").id;
 
-      // Update order summary
+      Object.entries(screens).forEach(([key, val]) => {
+        if (val && val.id === screenId) previousScreen = key;
+      });
+
       orderSummary.innerHTML = `
-                <h3>Selected Item</h3>
-                <p><span>${itemName}</span> <strong>₹${itemPrice}</strong></p>
-            `;
+      <h3>Selected Item</h3>
+      <p><span>${itemName}</span> <strong>₹${itemPrice}</strong></p>
+      `;
+
       orderSummary.classList.add("active");
 
-      // Navigate to order screen
       showScreen("order");
+
     });
+
   });
 
-  // Confirm order logic
-  document
-    .getElementById("btn-confirm-order")
-    .addEventListener("click", async () => {
-      const fullname = document.getElementById("fullname").value.trim();
-      const mobile = document.getElementById("mobile").value.trim();
-      const address = document.getElementById("address").value.trim();
+  // CONFIRM ORDER
+  document.getElementById("btn-confirm-order").addEventListener("click", async () => {
 
-      if (!fullname || !mobile || !address) {
-        alert("Please fill out all fields before ordering.");
-        return;
+    const fullname = document.getElementById("fullname").value.trim();
+    const mobile = document.getElementById("mobile").value.trim();
+    const address = document.getElementById("address").value.trim();
+
+    if (!fullname || !mobile || !address) {
+      alert("Fill all fields.");
+      return;
+    }
+
+    if (!currentOrder) return;
+
+    const btn = document.getElementById("btn-confirm-order");
+    const original = btn.innerText;
+
+    btn.innerText = "PROCESSING...";
+    btn.disabled = true;
+
+    try {
+
+      await addDoc(collection(db, "orders"), {
+        customerName: fullname,
+        customerMobile: mobile,
+        customerAddress: address,
+        itemName: currentOrder.item,
+        itemPrice: currentOrder.price,
+        timestamp: serverTimestamp(),
+      });
+
+      let targetPhone = "9966077583";
+
+      const eatScreens = [
+        "chicken",
+        "crispyChickenDrumsticks",
+        "crispyChickenPopcorn",
+        "crispyBonelessStripes",
+        "frenchFries",
+        "springPotato",
+        "crispyChickenLollipops",
+        "highProtienCombosSp",
+        "familyBucketCombo",
+        "bigBucketCombo",
+        "miniBucketCombo",
+        "highProtienCombos",
+      ];
+
+      if (eatScreens.includes(previousScreen)) {
+        targetPhone = "9441125812";
       }
 
-      if (currentOrder) {
-        const btnConfirm = document.getElementById("btn-confirm-order");
-        const originalText = btnConfirm.innerText;
-        btnConfirm.innerText = "PROCESSING...";
-        btnConfirm.disabled = true;
+      const message = `New Order - Sip & Chill
 
-        try {
-          // Save order to Firebase Firestore
-          await addDoc(collection(db, "orders"), {
-            customerName: fullname,
-            customerMobile: mobile,
-            customerAddress: address,
-            itemName: currentOrder.item,
-            itemPrice: currentOrder.price,
-            timestamp: serverTimestamp(),
-          });
+Customer:
+Name: ${fullname}
+Mobile: ${mobile}
+Address: ${address}
 
-          // Prepare order message for SMS
-          let targetPhone = "9966077583";
-          const eatAndEnjoyScreens = [
-            "chicken",
-            "crispyChickenDrumsticks",
-            "crispyChickenPopcorn",
-            "crispyBonelessStripes",
-            "frenchFries",
-            "springPotato",
-            "crispyChickenLollipops",
-            "highProtienCombosSp",
-            "familyBucketCombo",
-            "bigBucketCombo",
-            "miniBucketCombo",
-            "highProtienCombos",
-          ];
+Order:
+${currentOrder.item} - ₹${currentOrder.price}`;
 
-          if (eatAndEnjoyScreens.includes(previousScreen)) {
-            targetPhone = "9441125812";
-          }
+      window.location.href = `sms:${targetPhone}?body=${encodeURIComponent(message)}`;
 
-          const message = `*New Order: Sip & Chill*\n\n*Customer Details*\n*Name:* ${fullname}\n*Mobile:* ${mobile}\n*Address:* ${address}\n\n*Order Details*\n${currentOrder.item} - ₹${currentOrder.price}`;
+      document.getElementById("fullname").value = "";
+      document.getElementById("mobile").value = "";
+      document.getElementById("address").value = "";
 
-          const smsUrl = `sms:${targetPhone}?body=${encodeURIComponent(message)}`;
+      orderSummary.classList.remove("active");
 
-          // Open SMS app
-          window.location.href = smsUrl;
+      currentOrder = null;
 
-          // Reset form and go back to menu
-          document.getElementById("fullname").value = "";
-          document.getElementById("mobile").value = "";
-          document.getElementById("address").value = "";
+      showScreen("menu");
 
-          currentOrder = null;
-          orderSummary.classList.remove("active");
-          showScreen("menu");
-        } catch (error) {
-          console.error("Error adding document: ", error);
-          alert(
-            "Sorry, there was an error processing your order. Please try again.",
-          );
-        } finally {
-          btnConfirm.innerText = originalText;
-          btnConfirm.disabled = false;
-        }
-      }
-    });
+    } catch (error) {
+      console.error(error);
+      alert("Order failed.");
+    }
 
-  // Profile Click Logic
-   document.querySelector(".profile-icon").addEventListener("click", () => {
+    btn.innerText = original;
+    btn.disabled = false;
+
+  });
+
+  // PROFILE
+  document.querySelector(".profile-icon").addEventListener("click", () => {
     showScreen("profile");
   });
 
-  // Logout Logic
+  // LOGOUT
   document.getElementById("btn-logout").addEventListener("click", () => {
+
     currentUser = null;
-    localStorage.removeItem('currentUser');
+    localStorage.removeItem("currentUser");
+
     document.getElementById("username").value = "";
     document.getElementById("mobileNumber").value = "";
+
     showScreen("login");
+
   });
+
 });
