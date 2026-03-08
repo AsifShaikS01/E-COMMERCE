@@ -22,7 +22,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 
-// Safe analytics
+// Analytics Safe
 let analytics;
 try {
   analytics = getAnalytics(app);
@@ -64,7 +64,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const orderSummary = document.getElementById("order-summary");
 
-  // SCREEN SWITCH FUNCTION
+  // USERNAME VALIDATION FUNCTION
+  function isValidUsername(username) {
+    const regex = /^[A-Z]+$/;
+    return regex.test(username);
+  }
+
+  // AUTO CAPS + REMOVE SPACES
+  const usernameInputField = document.getElementById("username");
+  usernameInputField.addEventListener("input", function () {
+    this.value = this.value.toUpperCase().replace(/\s/g, "");
+  });
+
+  // SCREEN SWITCH
   function showScreen(screenName) {
     Object.values(screens).forEach((screen) => {
       if (screen) screen.classList.remove("active");
@@ -99,6 +111,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (!usernameInput || !mobileInput) {
       alert("Please enter username and mobile number.");
+      return;
+    }
+
+    if (!isValidUsername(usernameInput)) {
+      alert("Enter CAPS username without spaces");
       return;
     }
 
@@ -158,6 +175,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (!usernameInput || !mobileInput) {
       alert("Enter username and mobile number.");
+      return;
+    }
+
+    if (!isValidUsername(usernameInput)) {
+      alert("Enter CAPS username without spaces");
       return;
     }
 
