@@ -22,7 +22,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 
-// Analytics Safe
+// Analytics safe
 let analytics;
 try {
   analytics = getAnalytics(app);
@@ -64,15 +64,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const orderSummary = document.getElementById("order-summary");
 
-  // USERNAME VALIDATION FUNCTION
+  // USERNAME VALIDATION
   function isValidUsername(username) {
     const regex = /^[A-Z]+$/;
     return regex.test(username);
   }
 
   // AUTO CAPS + REMOVE SPACES
-  const usernameInputField = document.getElementById("username");
-  usernameInputField.addEventListener("input", function () {
+  document.getElementById("username").addEventListener("input", function () {
     this.value = this.value.toUpperCase().replace(/\s/g, "");
   });
 
