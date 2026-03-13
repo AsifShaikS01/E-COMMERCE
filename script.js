@@ -1,392 +1,234 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
-import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-analytics.js";
 import {
-  getFirestore,
-  collection,
-  addDoc,
-  getDocs,
-  query,
-  where,
-  serverTimestamp,
+getFirestore,
+collection,
+addDoc,
+getDocs,
+query,
+where,
+serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCzu0eB2OKKWaluF_M_7WcfmJ5Sa6Xa0UQ",
-  authDomain: "sip-and-chill-9c5f0.firebaseapp.com",
-  projectId: "sip-and-chill-9c5f0",
-  storageBucket: "sip-and-chill-9c5f0.firebasestorage.app",
-  messagingSenderId: "223547052485",
-  appId: "1:223547052485:web:d8b838623830ebf3ba7bac",
-  measurementId: "G-355G7DV7YF",
+apiKey: "AIzaSyCzu0eB2OKKWaluF_M_7WcfmJ5Sa6Xa0UQ",
+authDomain: "sip-and-chill-9c5f0.firebaseapp.com",
+projectId: "sip-and-chill-9c5f0",
+storageBucket: "sip-and-chill-9c5f0.appspot.com",
+messagingSenderId: "223547052485",
+appId: "1:223547052485:web:d8b838623830ebf3ba7bac"
 };
 
 const app = initializeApp(firebaseConfig);
-
-// Analytics safe
-let analytics;
-try {
-  analytics = getAnalytics(app);
-} catch (e) {
-  console.log("Analytics not supported.");
-}
-
 const db = getFirestore(app);
 
 document.addEventListener("DOMContentLoaded", () => {
 
-  const screens = {
-    login: document.getElementById("login-screen"),
-    menu: document.getElementById("menu-screen"),
-    iceCreams: document.getElementById("ice-creams-screen"),
-    juice: document.getElementById("juice-screen"),
-    spJuice: document.getElementById("sp-juice-screen"),
-    lassiItems: document.getElementById("lassi-items"),
-    faloodas: document.getElementById("faloodas-screen"),
-    profile: document.getElementById("profile-screen"),
-    order: document.getElementById("order-screen"),
-    chicken: document.getElementById("chicken-screen"),
-    crispyChickenDrumsticks: document.getElementById("crispy-chicken-drumsticks-screen"),
-    crispyChickenPopcorn: document.getElementById("crispy-chicken-popcorn-screen"),
-    crispyBonelessStripes: document.getElementById("crispy-boneless-stripes-screen"),
-    frenchFries: document.getElementById("french-fries-screen"),
-    springPotato: document.getElementById("spring-potato-screen"),
-    crispyChickenLollipops: document.getElementById("crispy-chicken-lollipops-screen"),
-    highProtienCombosSp: document.getElementById("high-protien-combos-sp-screen"),
-    familyBucketCombo: document.getElementById("family-bucket-combo-screen"),
-    bigBucketCombo: document.getElementById("big-bucket-combo-screen"),
-    miniBucketCombo: document.getElementById("mini-bucket-combo-screen"),
-    highProtienCombos: document.getElementById("high-protien-combos-screen"),
-  };
-
-  let previousScreen = "menu";
-  let currentUser = null;
-  let currentOrder = null;
-
-  const orderSummary = document.getElementById("order-summary");
-
-  // USERNAME VALIDATION
-  function isValidUsername(username) {
-    const regex = /^[A-Z]+$/;
-    return regex.test(username);
-  }
-
-  // AUTO CAPS + REMOVE SPACES
-  document.getElementById("username").addEventListener("input", function () {
-    this.value = this.value.toUpperCase().replace(/\s/g, "");
-  });
-
-  // SCREEN SWITCH
-  function showScreen(screenName) {
-    Object.values(screens).forEach((screen) => {
-      if (screen) screen.classList.remove("active");
-    });
-
-    if (screens[screenName]) {
-      screens[screenName].classList.add("active");
-    }
-  }
-
-  // CHECK LOGIN SESSION
-  const storedUser = localStorage.getItem("currentUser");
-
-  if (storedUser) {
-    currentUser = JSON.parse(storedUser);
-
-    document.getElementById("profile-username").innerText =
-      currentUser.username;
-    document.getElementById("profile-mobile").innerText =
-      currentUser.mobileNumber;
-
-    showScreen("menu");
-  } else {
-    showScreen("login");
-  }
-
-  // LOGIN
-  document.getElementById("btn-login").addEventListener("click", async () => {
-
-    const usernameInput = document.getElementById("username").value.trim();
-    const mobileInput = document.getElementById("mobileNumber").value.trim();
-
-    if (!usernameInput || !mobileInput) {
-      alert("Please enter username and mobile number.");
-      return;
-    }
-
-    if (!isValidUsername(usernameInput)) {
-      alert("Enter CAPS username without spaces");
-      return;
-    }
-
-    const btn = document.getElementById("btn-login");
-    const original = btn.innerText;
-
-    btn.innerText = "LOGGING IN...";
-    btn.disabled = true;
-
-    try {
+const screens = {
+login: document.getElementById("login-screen"),
+menu: document.getElementById("menu-screen"),
+order: document.getElementById("order-screen"),
+profile: document.getElementById("profile-screen")
+};
 
-      const q = query(
-        collection(db, "users"),
-        where("username", "==", usernameInput),
-        where("mobileNumber", "==", mobileInput)
-      );
+let currentUser = null;
+let currentOrder = null;
 
-      const querySnapshot = await getDocs(q);
+function showScreen(name){
 
-      if (!querySnapshot.empty) {
+Object.values(screens).forEach(s => s.classList.remove("active"));
+screens[name].classList.add("active");
 
-        const userData = querySnapshot.docs[0].data();
+}
 
-        currentUser = {
-          username: userData.username,
-          mobileNumber: userData.mobileNumber,
-        };
+const storedUser = localStorage.getItem("currentUser");
 
-        localStorage.setItem("currentUser", JSON.stringify(currentUser));
+if(storedUser){
 
-        document.getElementById("profile-username").innerText =
-          currentUser.username;
-        document.getElementById("profile-mobile").innerText =
-          currentUser.mobileNumber;
+currentUser = JSON.parse(storedUser);
 
-        showScreen("menu");
+document.getElementById("profile-username").innerText=currentUser.username;
+document.getElementById("profile-mobile").innerText=currentUser.mobileNumber;
 
-      } else {
-        alert("Invalid username or mobile number.");
-      }
+showScreen("menu");
 
-    } catch (error) {
-      console.error(error);
-      alert("Database connection error.");
-    }
+}else{
 
-    btn.innerText = original;
-    btn.disabled = false;
+showScreen("login");
 
-  });
+}
 
-  // REGISTER
-  document.getElementById("btn-register").addEventListener("click", async () => {
+function isValidUsername(username){
+return /^[A-Z]+$/.test(username);
+}
 
-    const usernameInput = document.getElementById("username").value.trim();
-    const mobileInput = document.getElementById("mobileNumber").value.trim();
+document.getElementById("username").addEventListener("input",function(){
+this.value=this.value.toUpperCase().replace(/\s/g,"");
+});
 
-    if (!usernameInput || !mobileInput) {
-      alert("Enter username and mobile number.");
-      return;
-    }
+document.getElementById("btn-login").addEventListener("click",async()=>{
 
-    if (!isValidUsername(usernameInput)) {
-      alert("Enter CAPS username without spaces");
-      return;
-    }
+const username=document.getElementById("username").value.trim();
+const mobile=document.getElementById("mobileNumber").value.trim();
 
-    const btn = document.getElementById("btn-register");
-    const original = btn.innerText;
+if(!username||!mobile){
+alert("Enter username and mobile");
+return;
+}
 
-    btn.innerText = "REGISTERING...";
-    btn.disabled = true;
+if(!isValidUsername(username)){
+alert("Username must be CAPS without spaces");
+return;
+}
 
-    try {
+const q=query(
+collection(db,"users"),
+where("username","==",username),
+where("mobileNumber","==",mobile)
+);
 
-      const q = query(
-        collection(db, "users"),
-        where("mobileNumber", "==", mobileInput)
-      );
+const snapshot=await getDocs(q);
 
-      const querySnapshot = await getDocs(q);
+if(!snapshot.empty){
 
-      if (!querySnapshot.empty) {
+currentUser={username,mobileNumber:mobile};
 
-        alert("Mobile already registered.");
+localStorage.setItem("currentUser",JSON.stringify(currentUser));
 
-      } else {
+document.getElementById("profile-username").innerText=username;
+document.getElementById("profile-mobile").innerText=mobile;
 
-        await addDoc(collection(db, "users"), {
-          username: usernameInput,
-          mobileNumber: mobileInput,
-          createdAt: serverTimestamp(),
-        });
+showScreen("menu");
 
-        alert("Registration successful. Please login.");
+}else{
 
-        document.getElementById("username").value = "";
-        document.getElementById("mobileNumber").value = "";
-      }
+alert("Invalid login");
 
-    } catch (error) {
-      console.error(error);
-      alert("Database error.");
-    }
+}
 
-    btn.innerText = original;
-    btn.disabled = false;
+});
 
-  });
+document.getElementById("btn-register").addEventListener("click",async()=>{
 
-  // MENU NAVIGATION
-  document.querySelectorAll(".menu-item:not(.disabled)").forEach((item) => {
+const username=document.getElementById("username").value.trim();
+const mobile=document.getElementById("mobileNumber").value.trim();
 
-    item.addEventListener("click", () => {
+if(!username||!mobile){
+alert("Enter username and mobile");
+return;
+}
 
-      const target = item.getAttribute("data-target");
+await addDoc(collection(db,"users"),{
+username,
+mobileNumber:mobile,
+createdAt:serverTimestamp()
+});
 
-      if (target) showScreen(target);
+alert("Registration successful. Now login.");
 
-    });
+});
 
-  });
+document.querySelectorAll(".order-btn").forEach(btn=>{
 
-  // BACK BUTTON
-  document.querySelectorAll(".back-btn").forEach((btn) => {
+btn.addEventListener("click",()=>{
 
-    btn.addEventListener("click", () => {
+const item=btn.dataset.item;
+const price=btn.dataset.price;
 
-      const screenId = btn.closest(".screen").id;
+currentOrder={item,price};
 
-      if (screenId === "order-screen") {
-        showScreen(previousScreen);
-      } else {
-        showScreen("menu");
-      }
+document.getElementById("order-summary").innerHTML=`
+<h3>${item}</h3>
+<p>Price: ₹${price}</p>
+`;
 
-    });
+showScreen("order");
 
-  });
+});
 
-  // ORDER BUTTON
-  document.querySelectorAll(".order-btn").forEach((btn) => {
+});
 
-    btn.addEventListener("click", () => {
+const form=document.getElementById("form");
+const submitBtn=document.getElementById("btn-confirm-order");
 
-      const itemName = btn.getAttribute("data-item");
-      const itemPrice = btn.getAttribute("data-price");
+form.addEventListener("submit",async(e)=>{
 
-      currentOrder = {
-        item: itemName,
-        price: itemPrice,
-      };
+e.preventDefault();
 
-      const screenId = btn.closest(".screen").id;
+const fullname=document.getElementById("fullname").value.trim();
+const mobile=document.getElementById("mobile").value.trim();
+const address=document.getElementById("address").value.trim();
 
-      Object.entries(screens).forEach(([key, val]) => {
-        if (val && val.id === screenId) previousScreen = key;
-      });
+if(!fullname||!mobile||!address){
+alert("Fill all fields");
+return;
+}
 
-      orderSummary.innerHTML = `
-      <h3>Selected Item</h3>
-      <p><span>${itemName}</span> <strong>₹${itemPrice}</strong></p>
-      `;
+submitBtn.innerText="Processing...";
+submitBtn.disabled=true;
 
-      orderSummary.classList.add("active");
+try{
 
-      showScreen("order");
+await addDoc(collection(db,"orders"),{
 
-    });
+customerName:fullname,
+customerMobile:mobile,
+customerAddress:address,
+itemName:currentOrder.item,
+itemPrice:currentOrder.price,
+timestamp:serverTimestamp()
 
-  });
+});
 
-  // CONFIRM ORDER
-  document.getElementById("btn-confirm-order").addEventListener("click", async () => {
+const formData=new FormData();
 
-    const fullname = document.getElementById("fullname").value.trim();
-    const mobile = document.getElementById("mobile").value.trim();
-    const address = document.getElementById("address").value.trim();
+formData.append("access_key","90b32d72-254f-4cbb-995c-e48864099a46");
+formData.append("subject","New Order - Sip & Chill");
 
-    if (!fullname || !mobile || !address) {
-      alert("Fill all fields.");
-      return;
-    }
+formData.append("message",
+`New Order
 
-    if (!currentOrder) return;
-
-    const btn = document.getElementById("btn-confirm-order");
-    const original = btn.innerText;
-
-    btn.innerText = "PROCESSING...";
-    btn.disabled = true;
-
-    try {
-
-      await addDoc(collection(db, "orders"), {
-        customerName: fullname,
-        customerMobile: mobile,
-        customerAddress: address,
-        itemName: currentOrder.item,
-        itemPrice: currentOrder.price,
-        timestamp: serverTimestamp(),
-      });
-
-      let targetPhone = "9966077583";
-
-      const eatScreens = [
-        "chicken",
-        "crispyChickenDrumsticks",
-        "crispyChickenPopcorn",
-        "crispyBonelessStripes",
-        "frenchFries",
-        "springPotato",
-        "crispyChickenLollipops",
-        "highProtienCombosSp",
-        "familyBucketCombo",
-        "bigBucketCombo",
-        "miniBucketCombo",
-        "highProtienCombos",
-      ];
-
-      if (eatScreens.includes(previousScreen)) {
-        targetPhone = "9441125812";
-      }
-
-      const message = `New Order - Sip & Chill
-
-Customer:
-Name: ${fullname}
+Customer: ${fullname}
 Mobile: ${mobile}
 Address: ${address}
 
-Order:
-${currentOrder.item} - ₹${currentOrder.price}`;
+Order Item: ${currentOrder.item}
+Price: ₹${currentOrder.price}`
+);
 
-      window.location.href = `sms:${targetPhone}?body=${encodeURIComponent(message)}`;
+await fetch("https://api.web3forms.com/submit",{
+method:"POST",
+body:formData
+});
 
-      document.getElementById("fullname").value = "";
-      document.getElementById("mobile").value = "";
-      document.getElementById("address").value = "";
+alert("Order placed successfully!");
 
-      orderSummary.classList.remove("active");
+form.reset();
 
-      currentOrder = null;
+showScreen("menu");
 
-      showScreen("menu");
+}catch(err){
 
-    } catch (error) {
-      console.error(error);
-      alert("Order failed.");
-    }
+console.error(err);
+alert("Order failed");
 
-    btn.innerText = original;
-    btn.disabled = false;
+}
 
-  });
+submitBtn.innerText="Confirm Order";
+submitBtn.disabled=false;
 
-  // PROFILE
-  document.querySelector(".profile-icon").addEventListener("click", () => {
-    showScreen("profile");
-  });
+});
 
-  // LOGOUT
-  document.getElementById("btn-logout").addEventListener("click", () => {
+document.querySelector(".profile-icon").addEventListener("click",()=>{
+showScreen("profile");
+});
 
-    currentUser = null;
-    localStorage.removeItem("currentUser");
+document.getElementById("btn-logout").addEventListener("click",()=>{
+localStorage.removeItem("currentUser");
+showScreen("login");
+});
 
-    document.getElementById("username").value = "";
-    document.getElementById("mobileNumber").value = "";
-
-    showScreen("login");
-
-  });
+document.querySelectorAll(".back-btn").forEach(btn=>{
+btn.addEventListener("click",()=>showScreen("menu"));
+});
 
 });
