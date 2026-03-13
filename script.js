@@ -1,234 +1,392 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
+import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-analytics.js";
 import {
-getFirestore,
-collection,
-addDoc,
-getDocs,
-query,
-where,
-serverTimestamp
+  getFirestore,
+  collection,
+  addDoc,
+  getDocs,
+  query,
+  where,
+  serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
 const firebaseConfig = {
-apiKey: "AIzaSyCzu0eB2OKKWaluF_M_7WcfmJ5Sa6Xa0UQ",
-authDomain: "sip-and-chill-9c5f0.firebaseapp.com",
-projectId: "sip-and-chill-9c5f0",
-storageBucket: "sip-and-chill-9c5f0.appspot.com",
-messagingSenderId: "223547052485",
-appId: "1:223547052485:web:d8b838623830ebf3ba7bac"
+  apiKey: "AIzaSyCzu0eB2OKKWaluF_M_7WcfmJ5Sa6Xa0UQ",
+  authDomain: "sip-and-chill-9c5f0.firebaseapp.com",
+  projectId: "sip-and-chill-9c5f0",
+  storageBucket: "sip-and-chill-9c5f0.firebasestorage.app",
+  messagingSenderId: "223547052485",
+  appId: "1:223547052485:web:d8b838623830ebf3ba7bac",
+  measurementId: "G-355G7DV7YF",
 };
 
 const app = initializeApp(firebaseConfig);
+
+// Analytics safe
+let analytics;
+try {
+  analytics = getAnalytics(app);
+} catch (e) {
+  console.log("Analytics not supported.");
+}
+
 const db = getFirestore(app);
 
 document.addEventListener("DOMContentLoaded", () => {
 
-const screens = {
-login: document.getElementById("login-screen"),
-menu: document.getElementById("menu-screen"),
-order: document.getElementById("order-screen"),
-profile: document.getElementById("profile-screen")
-};
+  const screens = {
+    login: document.getElementById("login-screen"),
+    menu: document.getElementById("menu-screen"),
+    iceCreams: document.getElementById("ice-creams-screen"),
+    juice: document.getElementById("juice-screen"),
+    spJuice: document.getElementById("sp-juice-screen"),
+    lassiItems: document.getElementById("lassi-items"),
+    faloodas: document.getElementById("faloodas-screen"),
+    profile: document.getElementById("profile-screen"),
+    order: document.getElementById("order-screen"),
+    chicken: document.getElementById("chicken-screen"),
+    crispyChickenDrumsticks: document.getElementById("crispy-chicken-drumsticks-screen"),
+    crispyChickenPopcorn: document.getElementById("crispy-chicken-popcorn-screen"),
+    crispyBonelessStripes: document.getElementById("crispy-boneless-stripes-screen"),
+    frenchFries: document.getElementById("french-fries-screen"),
+    springPotato: document.getElementById("spring-potato-screen"),
+    crispyChickenLollipops: document.getElementById("crispy-chicken-lollipops-screen"),
+    highProtienCombosSp: document.getElementById("high-protien-combos-sp-screen"),
+    familyBucketCombo: document.getElementById("family-bucket-combo-screen"),
+    bigBucketCombo: document.getElementById("big-bucket-combo-screen"),
+    miniBucketCombo: document.getElementById("mini-bucket-combo-screen"),
+    highProtienCombos: document.getElementById("high-protien-combos-screen"),
+  };
 
-let currentUser = null;
-let currentOrder = null;
+  let previousScreen = "menu";
+  let currentUser = null;
+  let currentOrder = null;
 
-function showScreen(name){
+  const orderSummary = document.getElementById("order-summary");
 
-Object.values(screens).forEach(s => s.classList.remove("active"));
-screens[name].classList.add("active");
+  // USERNAME VALIDATION
+  function isValidUsername(username) {
+    const regex = /^[A-Z]+$/;
+    return regex.test(username);
+  }
 
-}
+  // AUTO CAPS + REMOVE SPACES
+  document.getElementById("username").addEventListener("input", function () {
+    this.value = this.value.toUpperCase().replace(/\s/g, "");
+  });
 
-const storedUser = localStorage.getItem("currentUser");
+  // SCREEN SWITCH
+  function showScreen(screenName) {
+    Object.values(screens).forEach((screen) => {
+      if (screen) screen.classList.remove("active");
+    });
 
-if(storedUser){
+    if (screens[screenName]) {
+      screens[screenName].classList.add("active");
+    }
+  }
 
-currentUser = JSON.parse(storedUser);
+  // CHECK LOGIN SESSION
+  const storedUser = localStorage.getItem("currentUser");
 
-document.getElementById("profile-username").innerText=currentUser.username;
-document.getElementById("profile-mobile").innerText=currentUser.mobileNumber;
+  if (storedUser) {
+    currentUser = JSON.parse(storedUser);
 
-showScreen("menu");
+    document.getElementById("profile-username").innerText =
+      currentUser.username;
+    document.getElementById("profile-mobile").innerText =
+      currentUser.mobileNumber;
 
-}else{
+    showScreen("menu");
+  } else {
+    showScreen("login");
+  }
 
-showScreen("login");
+  // LOGIN
+  document.getElementById("btn-login").addEventListener("click", async () => {
 
-}
+    const usernameInput = document.getElementById("username").value.trim();
+    const mobileInput = document.getElementById("mobileNumber").value.trim();
 
-function isValidUsername(username){
-return /^[A-Z]+$/.test(username);
-}
+    if (!usernameInput || !mobileInput) {
+      alert("Please enter username and mobile number.");
+      return;
+    }
 
-document.getElementById("username").addEventListener("input",function(){
-this.value=this.value.toUpperCase().replace(/\s/g,"");
-});
+    if (!isValidUsername(usernameInput)) {
+      alert("Enter CAPS username without spaces");
+      return;
+    }
 
-document.getElementById("btn-login").addEventListener("click",async()=>{
+    const btn = document.getElementById("btn-login");
+    const original = btn.innerText;
 
-const username=document.getElementById("username").value.trim();
-const mobile=document.getElementById("mobileNumber").value.trim();
+    btn.innerText = "LOGGING IN...";
+    btn.disabled = true;
 
-if(!username||!mobile){
-alert("Enter username and mobile");
-return;
-}
+    try {
 
-if(!isValidUsername(username)){
-alert("Username must be CAPS without spaces");
-return;
-}
+      const q = query(
+        collection(db, "users"),
+        where("username", "==", usernameInput),
+        where("mobileNumber", "==", mobileInput)
+      );
 
-const q=query(
-collection(db,"users"),
-where("username","==",username),
-where("mobileNumber","==",mobile)
-);
+      const querySnapshot = await getDocs(q);
 
-const snapshot=await getDocs(q);
+      if (!querySnapshot.empty) {
 
-if(!snapshot.empty){
+        const userData = querySnapshot.docs[0].data();
 
-currentUser={username,mobileNumber:mobile};
+        currentUser = {
+          username: userData.username,
+          mobileNumber: userData.mobileNumber,
+        };
 
-localStorage.setItem("currentUser",JSON.stringify(currentUser));
+        localStorage.setItem("currentUser", JSON.stringify(currentUser));
 
-document.getElementById("profile-username").innerText=username;
-document.getElementById("profile-mobile").innerText=mobile;
+        document.getElementById("profile-username").innerText =
+          currentUser.username;
+        document.getElementById("profile-mobile").innerText =
+          currentUser.mobileNumber;
 
-showScreen("menu");
+        showScreen("menu");
 
-}else{
+      } else {
+        alert("Invalid username or mobile number.");
+      }
 
-alert("Invalid login");
+    } catch (error) {
+      console.error(error);
+      alert("Database connection error.");
+    }
 
-}
+    btn.innerText = original;
+    btn.disabled = false;
 
-});
+  });
 
-document.getElementById("btn-register").addEventListener("click",async()=>{
+  // REGISTER
+  document.getElementById("btn-register").addEventListener("click", async () => {
 
-const username=document.getElementById("username").value.trim();
-const mobile=document.getElementById("mobileNumber").value.trim();
+    const usernameInput = document.getElementById("username").value.trim();
+    const mobileInput = document.getElementById("mobileNumber").value.trim();
 
-if(!username||!mobile){
-alert("Enter username and mobile");
-return;
-}
+    if (!usernameInput || !mobileInput) {
+      alert("Enter username and mobile number.");
+      return;
+    }
 
-await addDoc(collection(db,"users"),{
-username,
-mobileNumber:mobile,
-createdAt:serverTimestamp()
-});
+    if (!isValidUsername(usernameInput)) {
+      alert("Enter CAPS username without spaces");
+      return;
+    }
 
-alert("Registration successful. Now login.");
+    const btn = document.getElementById("btn-register");
+    const original = btn.innerText;
 
-});
+    btn.innerText = "REGISTERING...";
+    btn.disabled = true;
 
-document.querySelectorAll(".order-btn").forEach(btn=>{
+    try {
 
-btn.addEventListener("click",()=>{
+      const q = query(
+        collection(db, "users"),
+        where("mobileNumber", "==", mobileInput)
+      );
 
-const item=btn.dataset.item;
-const price=btn.dataset.price;
+      const querySnapshot = await getDocs(q);
 
-currentOrder={item,price};
+      if (!querySnapshot.empty) {
 
-document.getElementById("order-summary").innerHTML=`
-<h3>${item}</h3>
-<p>Price: ₹${price}</p>
-`;
+        alert("Mobile already registered.");
 
-showScreen("order");
+      } else {
 
-});
+        await addDoc(collection(db, "users"), {
+          username: usernameInput,
+          mobileNumber: mobileInput,
+          createdAt: serverTimestamp(),
+        });
 
-});
+        alert("Registration successful. Please login.");
 
-const form=document.getElementById("form");
-const submitBtn=document.getElementById("btn-confirm-order");
+        document.getElementById("username").value = "";
+        document.getElementById("mobileNumber").value = "";
+      }
 
-form.addEventListener("submit",async(e)=>{
+    } catch (error) {
+      console.error(error);
+      alert("Database error.");
+    }
 
-e.preventDefault();
+    btn.innerText = original;
+    btn.disabled = false;
 
-const fullname=document.getElementById("fullname").value.trim();
-const mobile=document.getElementById("mobile").value.trim();
-const address=document.getElementById("address").value.trim();
+  });
 
-if(!fullname||!mobile||!address){
-alert("Fill all fields");
-return;
-}
+  // MENU NAVIGATION
+  document.querySelectorAll(".menu-item:not(.disabled)").forEach((item) => {
 
-submitBtn.innerText="Processing...";
-submitBtn.disabled=true;
+    item.addEventListener("click", () => {
 
-try{
+      const target = item.getAttribute("data-target");
 
-await addDoc(collection(db,"orders"),{
+      if (target) showScreen(target);
 
-customerName:fullname,
-customerMobile:mobile,
-customerAddress:address,
-itemName:currentOrder.item,
-itemPrice:currentOrder.price,
-timestamp:serverTimestamp()
+    });
 
-});
+  });
 
-const formData=new FormData();
+  // BACK BUTTON
+  document.querySelectorAll(".back-btn").forEach((btn) => {
 
-formData.append("access_key","90b32d72-254f-4cbb-995c-e48864099a46");
-formData.append("subject","New Order - Sip & Chill");
+    btn.addEventListener("click", () => {
 
-formData.append("message",
-`New Order
+      const screenId = btn.closest(".screen").id;
 
-Customer: ${fullname}
+      if (screenId === "order-screen") {
+        showScreen(previousScreen);
+      } else {
+        showScreen("menu");
+      }
+
+    });
+
+  });
+
+  // ORDER BUTTON
+  document.querySelectorAll(".order-btn").forEach((btn) => {
+
+    btn.addEventListener("click", () => {
+
+      const itemName = btn.getAttribute("data-item");
+      const itemPrice = btn.getAttribute("data-price");
+
+      currentOrder = {
+        item: itemName,
+        price: itemPrice,
+      };
+
+      const screenId = btn.closest(".screen").id;
+
+      Object.entries(screens).forEach(([key, val]) => {
+        if (val && val.id === screenId) previousScreen = key;
+      });
+
+      orderSummary.innerHTML = `
+      <h3>Selected Item</h3>
+      <p><span>${itemName}</span> <strong>₹${itemPrice}</strong></p>
+      `;
+
+      orderSummary.classList.add("active");
+
+      showScreen("order");
+
+    });
+
+  });
+
+  // CONFIRM ORDER
+  document.getElementById("btn-confirm-order").addEventListener("click", async () => {
+
+    const fullname = document.getElementById("fullname").value.trim();
+    const mobile = document.getElementById("mobile").value.trim();
+    const address = document.getElementById("address").value.trim();
+
+    if (!fullname || !mobile || !address) {
+      alert("Fill all fields.");
+      return;
+    }
+
+    if (!currentOrder) return;
+
+    const btn = document.getElementById("btn-confirm-order");
+    const original = btn.innerText;
+
+    btn.innerText = "PROCESSING...";
+    btn.disabled = true;
+
+    try {
+
+      await addDoc(collection(db, "orders"), {
+        customerName: fullname,
+        customerMobile: mobile,
+        customerAddress: address,
+        itemName: currentOrder.item,
+        itemPrice: currentOrder.price,
+        timestamp: serverTimestamp(),
+      });
+
+      let targetPhone = "9966077583";
+
+      const eatScreens = [
+        "chicken",
+        "crispyChickenDrumsticks",
+        "crispyChickenPopcorn",
+        "crispyBonelessStripes",
+        "frenchFries",
+        "springPotato",
+        "crispyChickenLollipops",
+        "highProtienCombosSp",
+        "familyBucketCombo",
+        "bigBucketCombo",
+        "miniBucketCombo",
+        "highProtienCombos",
+      ];
+
+      if (eatScreens.includes(previousScreen)) {
+        targetPhone = "9441125812";
+      }
+
+      const message = `New Order - Sip & Chill
+
+Customer:
+Name: ${fullname}
 Mobile: ${mobile}
 Address: ${address}
 
-Order Item: ${currentOrder.item}
-Price: ₹${currentOrder.price}`
-);
+Order:
+${currentOrder.item} - ₹${currentOrder.price}`;
 
-await fetch("https://api.web3forms.com/submit",{
-method:"POST",
-body:formData
-});
+      window.location.href = `sms:${targetPhone}?body=${encodeURIComponent(message)}`;
 
-alert("Order placed successfully!");
+      document.getElementById("fullname").value = "";
+      document.getElementById("mobile").value = "";
+      document.getElementById("address").value = "";
 
-form.reset();
+      orderSummary.classList.remove("active");
 
-showScreen("menu");
+      currentOrder = null;
 
-}catch(err){
+      showScreen("menu");
 
-console.error(err);
-alert("Order failed");
+    } catch (error) {
+      console.error(error);
+      alert("Order failed.");
+    }
 
-}
+    btn.innerText = original;
+    btn.disabled = false;
 
-submitBtn.innerText="Confirm Order";
-submitBtn.disabled=false;
+  });
 
-});
+  // PROFILE
+  document.querySelector(".profile-icon").addEventListener("click", () => {
+    showScreen("profile");
+  });
 
-document.querySelector(".profile-icon").addEventListener("click",()=>{
-showScreen("profile");
-});
+  // LOGOUT
+  document.getElementById("btn-logout").addEventListener("click", () => {
 
-document.getElementById("btn-logout").addEventListener("click",()=>{
-localStorage.removeItem("currentUser");
-showScreen("login");
-});
+    currentUser = null;
+    localStorage.removeItem("currentUser");
 
-document.querySelectorAll(".back-btn").forEach(btn=>{
-btn.addEventListener("click",()=>showScreen("menu"));
-});
+    document.getElementById("username").value = "";
+    document.getElementById("mobileNumber").value = "";
+
+    showScreen("login");
+
+  });
 
 });
